@@ -18,25 +18,67 @@ const baseTimeEl = document.querySelector('.base-time');
 const penaltyTimeEl = document.querySelector('.penalty-time');
 const playAgainBtn = document.querySelector('.play-again');
 
-// Equations
 let questionAmount = 0;
 let equationsArray = [];
+let playerGuessArray = [];
 
-// Game Page
 let firstNumber = 0;
 let secondNumber = 0;
 let equationObject = {};
 const wrongFormat = [];
 
-// Time
+let timer;
+let timePlayed = 0;
+let baseTime = 0;
+let penaltyTime = 0;
+let finalTime = 0;
+let finalTimeDisplay = '0.0s';
 
-// Scroll
+let valueY = 0;
+
+function checkTime() {
+  if (playerGuessArray.length == questionAmount) {
+    clearInterval(time);
+    equationsArray.forEach((equatin, index) => {
+      if (equatin.evaluated === playerdGuessArray[index]) {
+        //No penalty here
+      } else {
+        penaltyTime += 0,5;
+      }
+    });
+    finalTime = timePlayed + penaltyTime;
+  }
+}
+
+function addTime() {
+  timePlayed += 0.1;
+  checkTime();
+}
+
+function startTimer() {
+  timePlayed = 0;
+  penaltyTime = 0;
+  finalTime = 0;
+  timer = setInterval(addTime, 100);
+  gamePage.removeEventListener('click', startTimer);
+}
+
+function select(guessedTrue) {
+  console.log(playerGuessArray);
+  valueY += 80;
+  itemContainer.scroll(0, valueY);
+  return guessedTrue ? playerGuessArray.push('true') : playerGuessArray.push('false');
+}
+
+function showGamePage() {
+  gamePage.hidden = false;
+  countdownPage.hidden = true;
+}
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-// Create Correct/Incorrect Random Equations
 function createEquations() {
   const correctEquations = getRandomInt(questionAmount);
   const wrongEquations = questionAmount - correctEquations;
@@ -61,40 +103,40 @@ function createEquations() {
     equationsArray.push(equationObject);
   }
   shuffle(equationsArray);
-  console.log(equationsArray);
 }
 
-// Dynamically adding correct/incorrect equations
-// function populateGamePage() {
-//   // Reset DOM, Set Blank Space Above
-//   itemContainer.textContent = '';
-//   // Spacer
-//   const topSpacer = document.createElement('div');
-//   topSpacer.classList.add('height-240');
-//   // Selected Item
-//   const selectedItem = document.createElement('div');
-//   selectedItem.classList.add('selected-item');
-//   // Append
-//   itemContainer.append(topSpacer, selectedItem);
+function equationsToDOM() {
+  equationsArray.forEach((equation) => {
+    const item = document.createElement('div');
+    item.classList.add('item');
+    const equationText = document.createElement('h1');
+    equationText.textContent = equation.value;
+    item.appendChild(equationText);
+    itemContainer.appendChild(item);
+  });
+}
 
-//   // Create Equations, Build Elements in DOM
-
-//   // Set Blank Space Below
-//   const bottomSpacer = document.createElement('div');
-//   bottomSpacer.classList.add('height-500');
-//   itemContainer.appendChild(bottomSpacer);
-// }
+function populateGamePage() {
+  itemContainer.textContent = '';
+  const topSpacer = document.createElement('div');
+  topSpacer.classList.add('height-240');
+  const selectedItem = document.createElement('div');
+  selectedItem.classList.add('selected-item');
+  itemContainer.append(topSpacer, selectedItem);
+  createEquations();
+  equationsToDOM();
+  const bottomSpacer = document.createElement('div');
+  bottomSpacer.classList.add('height-500');
+  itemContainer.appendChild(bottomSpacer);
+}
 
 function shuffle(array) {
   let currentIndex = array.length,  randomIndex;
-
   // While there remain elements to shuffle...
   while (currentIndex != 0) {
-
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
-
     // And swap it with the current element.
     [array[currentIndex], array[randomIndex]] = [
       array[randomIndex], array[currentIndex]];
@@ -119,7 +161,8 @@ function showCountdown() {
   countdownPage.hidden = false;
   splashPage.hidden = true;
   countdownStart();
-  createEquations();
+  populateGamePage();
+  setTimeout(showGamePage, 4000);
 }
 
 function getRadioValue() {
@@ -150,3 +193,4 @@ startForm.addEventListener('click', () => {
 });
 
 startForm.addEventListener('submit', selectQuestion);
+gamePage.addEventListener('click', startTimer);
